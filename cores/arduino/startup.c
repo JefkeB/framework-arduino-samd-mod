@@ -181,7 +181,7 @@ void SystemInit( void )
   /* Write full configuration to DFLL control register */
   SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_CSTEP( 0x1f / 4 ) | // Coarse step is 31, half of the max value
                          SYSCTRL_DFLLMUL_FSTEP( 10 ) |
-                         SYSCTRL_DFLLMUL_MUL( (48000) ) ;
+                         SYSCTRL_DFLLMUL_MUL( (48000000/(8000000/250)) ) ;
 
   SYSCTRL->DFLLCTRL.reg = 0;
 

@@ -1,0 +1,6 @@
+{
+    "name": "framework-arduino-samd",
+    "description": "Arduino Wiring-based Framework (SAMD Core)",
+    "url": "https://github.com/arduino/ArduinoCore-samd",
+    "version": "1.8.6"
+}

@@ -96,29 +96,36 @@ void SystemInit( void )
   }
 
   /* ----------------------------------------------------------------------------------------------
-   * 2) Put XOSC32K as source of Generic Clock Generator 1
+   * 2) Put OSC8M as source of Generic Clock Generator 1
    */
-  GCLK->GENDIV.reg = GCLK_GENDIV_ID( GENERIC_CLOCK_GENERATOR_XOSC32K ) ; // Generic Clock Generator 1
+  GCLK->GENDIV.reg = GCLK_GENDIV_ID( 1 ) | GCLK_GENDIV_DIV(250); // Generic Clock Generator 1
 
+  SYSCTRL->OSC8M.bit.PRESC = SYSCTRL_OSC8M_PRESC_0_Val ;  //CMSIS 4.5 changed the prescaler defines
   while ( GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY )
   {
     /* Wait for synchronization */
   }
 
   /* Write Generic Clock Generator 1 configuration */
-  GCLK->GENCTRL.reg = GCLK_GENCTRL_ID( GENERIC_CLOCK_GENERATOR_OSC32K ) | // Generic Clock Generator 1
-#if defined(CRYSTALLESS)
-                      GCLK_GENCTRL_SRC_OSC32K | // Selected source is Internal 32KHz Oscillator
-#else
-                      GCLK_GENCTRL_SRC_XOSC32K | // Selected source is External 32KHz Oscillator
-#endif
+  GCLK->GENCTRL.reg = GCLK_GENCTRL_ID( 1 ) | // Generic Clock Generator 1
+                      GCLK_GENCTRL_SRC_OSC8M | // Selected source is Internal 32KHz Oscillator
 //                      GCLK_GENCTRL_OE | // Output clock to a pin for tests
                       GCLK_GENCTRL_GENEN ;
+
 
   while ( GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY )
   {
     /* Wait for synchronization */
   }
+  
+
+#if 0
+  // Output the clock -> enable GCLK_GENCTRL_OE in line above
+  // Enable the port multiplexer on digital pin 
+  PORT->Group[1].PINCFG[23].bit.PMUXEN = 1;
+  // Switch the port multiplexer to peripheral H (GCLK_IO[x])
+  PORT->Group[1].PMUX[23 >> 1].reg |= PORT_PMUX_PMUXO_H;
+#endif   
 
   /* ----------------------------------------------------------------------------------------------
    * 3) Put Generic Clock Generator 1 as source for Generic Clock Multiplexer 0 (DFLL48M reference)
@@ -145,7 +152,7 @@ void SystemInit( void )
   {
     /* Wait for synchronization */
   }
-
+#if 0
   SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_CSTEP( 31 ) | // Coarse step is 31, half of the max value
                          SYSCTRL_DFLLMUL_FSTEP( 511 ) | // Fine step is 511, half of the max value
                          SYSCTRL_DFLLMUL_MUL( (VARIANT_MCK + VARIANT_MAINOSC/2) / VARIANT_MAINOSC ) ; // External 32KHz is the reference
@@ -154,7 +161,7 @@ void SystemInit( void )
   {
     /* Wait for synchronization */
   }
-
+#endif
 #if defined(CRYSTALLESS)
 
   #define NVM_SW_CALIB_DFLL48M_COARSE_VAL 58
@@ -185,7 +192,7 @@ void SystemInit( void )
 
   SYSCTRL->DFLLCTRL.reg =  SYSCTRL_DFLLCTRL_MODE |
                            SYSCTRL_DFLLCTRL_CCDIS |
-                           SYSCTRL_DFLLCTRL_USBCRM | /* USB correction */
+//                           SYSCTRL_DFLLCTRL_USBCRM | /* USB correction */
                            SYSCTRL_DFLLCTRL_BPLCKC;
 
   while ( (SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0 )
@@ -245,6 +252,14 @@ void SystemInit( void )
   {
     /* Wait for synchronization */
   }
+  
+#if 0
+  // Output the clock -> enable GCLK_GENCTRL_OE in line above
+  // Enable the port multiplexer on digital pin 
+  PORT->Group[0].PINCFG[28].bit.PMUXEN = 1;
+  // Switch the port multiplexer to peripheral H (GCLK_IO[x])
+  PORT->Group[0].PMUX[28 >> 1].reg |= PORT_PMUX_PMUXE_H;
+#endif  
 
   /* ----------------------------------------------------------------------------------------------
    * 6) Modify PRESCaler value of OSC8M to have 8MHz
@@ -267,6 +282,13 @@ void SystemInit( void )
   {
     /* Wait for synchronization */
   }
+
+#if 0
+  // Output the clock -> enable GCLK_GENCTRL_OE in line above
+  PORT->Group[0].PINCFG[17].bit.PMUXEN = 1;
+  // Switch the port multiplexer to peripheral H (GCLK_IO[x])
+  PORT->Group[0].PMUX[17 >> 1].reg |= PORT_PMUX_PMUXO_H;
+#endif
 
   /*
    * Now that all system clocks are configured, we can set CPU and APBx BUS clocks.

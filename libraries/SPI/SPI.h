@@ -156,6 +156,10 @@ class SPIClass {
   uint32_t interruptMask;
 };
 
+
+extern SPIClass spiFLASH;
+#define SPI spiFLASH 
+
 #if SPI_INTERFACES_COUNT > 0
   extern SPIClass SPI;
 #endif
